@@ -16,6 +16,10 @@ public class RubyController : MonoBehaviour
     public Text ScoreText;
     private int score;
 
+    private int cogsValue;
+    public Text cogsText;
+    public bool isFiring;
+
     public GameObject winText;
     public GameObject loseText;
     
@@ -27,6 +31,8 @@ public class RubyController : MonoBehaviour
     public AudioClip hitSound;
     public AudioClip winMusic;
     public AudioClip loseMusic;
+    public AudioClip declineSound;
+    public AudioClip reloadSound;
     
     public float timeInvincible = 2.0f;
     bool isInvincible;
@@ -48,6 +54,9 @@ public class RubyController : MonoBehaviour
         animator = GetComponent<Animator>();
         
         currentHealth = maxHealth;
+
+        cogsValue = 4;
+        SetCogsText();
 
         winText.SetActive(false);
         loseText.SetActive(false);
@@ -90,11 +99,7 @@ public class RubyController : MonoBehaviour
                 isInvincible = false;
         }
         
-        if(Input.GetKeyDown(KeyCode.C))
-        {
-            Launch();
-        }
-
+        
         if (Input.GetKey("escape"))
         {
             Application.Quit();
@@ -109,6 +114,7 @@ public class RubyController : MonoBehaviour
                 if (character != null)
                 {
                     character.DisplayDialog();
+                    PlaySound(declineSound);
                 }
             }
         }
@@ -145,6 +151,15 @@ public class RubyController : MonoBehaviour
             }
         }
 
+        if (Input.GetKeyDown(KeyCode.C) && !isFiring && cogsValue > 0)
+        {
+            isFiring = true;
+            cogsValue -= 1;
+            SetCogsText();
+            isFiring = false;
+            Launch();
+        }
+
     }
     
     void FixedUpdate()
@@ -154,6 +169,22 @@ public class RubyController : MonoBehaviour
         position.y = position.y + speed * vertical * Time.deltaTime;
 
         rigidbody2d.MovePosition(position);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("PickupCog"))
+        {
+            other.gameObject.SetActive(false);
+            cogsValue = cogsValue + 4; // this is for the ammo bag to give x amount of cogs
+            SetCogsText();
+            PlaySound(reloadSound);
+        }
+    }
+
+    void SetCogsText()
+    {
+        cogsText.text = "Cog Ammo:" + cogsValue.ToString();
     }
 
     public void ChangeHealth(int amount)

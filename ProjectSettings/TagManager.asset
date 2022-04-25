@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - RC
+  - PickupCog
   layers:
   - Default
   - TransparentFX
